@@ -1,0 +1,10 @@
+
+> frontend@0.0.0 dev
+> vite --host 3001
+
+
+  VITE v4.3.9  ready in 179 ms
+
+  ➜  Local:   http://3001:3001/
+  ➜  Network: http://192.168.1.23:3001/
+  ➜  Network: http://192.168.27.149:3001/

@@ -1,0 +1,21 @@
+# modules folder
+node_modules
+
+# pnpm package manager
+pnpm-lock.yaml
+
+# npm package manager
+package-lock.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment variables
+.env*
+
+# macOS
+.DS_Store

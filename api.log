@@ -1,0 +1,11 @@
+
+> api@1.0.0 start
+> npx knex migrate:latest && node index.js
+
+Connection string:  postgres://admin:password@localhost/inventory
+Using environment: development
+Already up to date
+Connection string:  postgres://admin:password@localhost/inventory
+Server is listening on port 3000
+server running on port undefined
+[0mGET /api/v1/item [32m201[0m 19.014 ms - 317[0m
