@@ -1,20 +1,23 @@
 FROM node:19-alpine3.17
 
-# set the directory docekr is runnin the commands
+ARG ENVIRONMENT=production
+
 WORKDIR /ui
 
-# copy source code
 COPY . /ui
 
-# update packages
 RUN apk update && \
-  apk upgrade -f && \
-  npm install -g pnpm
+    apk upgrade -f && \
+    npm install -g pnpm && \
+    if [ "$ENVIRONMENT" = "development" ] ; then pnpm install ; else pnpm install --only=production ; fi
 
-# install
-RUN pnpm install
+RUN if [ "$ENVIRONMENT" = "production" ] ; then pnpm run build && npm install -g serve ; fi
 
-CMD [ "pnpm", "dev" ]
+RUN echo -e "#!/bin/sh\n\
+if [ \"\$ENVIRONMENT\" = \"development\" ] ; then\n\
+  pnpm dev\n\
+else\n\
+  serve -s dist -l tcp://0.0.0.0:\$PORT\n\
+fi" > /ui/entrypoint.sh && chmod +x /ui/entrypoint.sh
 
-# run the built app on vite static server
-
+CMD [ "/ui/entrypoint.sh" ]
