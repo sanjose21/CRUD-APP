@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
-import { TextField, Button, Grid, Box, Dialog, DialogTitle, DialogContent } from '@material-ui/core';
-import Alert from '@material-ui/lab/Alert';
+/* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable no-param-reassign */
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable import/prefer-default-export */
 import axios from 'axios';
+import React, { useState } from 'react';
+import { Alert, Col, Row } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -9,13 +12,13 @@ import { useSome } from '../utilities/MainContextProvider';
 
 export function ItemForm({ item, editMode }) {
   const location = useLocation();
+  // context
   const { isLoggedIn, currentUser } = useSome();
+
   const navigate = useNavigate();
 
   const [userError, setUserError] = useState(false);
   const [userExist, setUserExist] = useState('');
-  const [open, setOpen] = useState(false); // State for the modal
-
   const form = useForm();
   const { register, handleSubmit } = form;
   register('');
@@ -23,17 +26,7 @@ export function ItemForm({ item, editMode }) {
   const headers = {
     'Content-Type': 'application/json',
   };
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const handleData = (data) => {
-    // Form validation
     if (Object.values(data).some((value) => !value)) {
       setUserError(true);
       setUserExist('All fields are required');
@@ -41,13 +34,14 @@ export function ItemForm({ item, editMode }) {
       data.user_id = currentUser.id;
       if (location.pathname.includes('/item')) {
         axios
-          .patch(`http://localhost:3000/api/v1/item/${item.id}`, JSON.stringify(data), {
-            headers,
-          })
-          .then(() => {
-            navigate('/adminInventory');
-            handleClose();
-          })
+          .patch(
+            `http://localhost:3000/api/v1/item/${item.id}`,
+            JSON.stringify(data),
+            {
+              headers,
+            },
+          )
+          .then(() => navigate('/admininventory'))
           .catch((err) => {
             setUserError(true);
             console.log(err.response.data);
@@ -56,13 +50,14 @@ export function ItemForm({ item, editMode }) {
           });
       } else {
         axios
-          .post('http://localhost:3000/api/v1/createitem', JSON.stringify(data), {
-            headers,
-          })
-          .then(() => {
-            navigate('/adminInventory');
-            handleClose(); // Close the modal after submitting
-          })
+          .post(
+            'http://localhost:3000/api/v1/createitem',
+            JSON.stringify(data),
+            {
+              headers,
+            },
+          )
+          .then((res) => navigate('/admininventory'))
           .catch((err) => {
             setUserError(true);
             console.log(err.response.data);
@@ -73,76 +68,87 @@ export function ItemForm({ item, editMode }) {
     }
   };
 
-  useEffect(() => {
-    if (location.pathname.includes('/createitem')) {
-      handleOpen();
-    }
-  }, [location.pathname]);
-
-  if (userError) {
+  if (userError)
     return (
-      <Alert severity='error'>
+      <Alert key='danger' variant='danger'>
         {`${userExist} `}
-        <Button color='secondary' onClick={() => setUserError(false)}>
-          Please Retry
-        </Button>
+        <button onClick={() => setUserError(false)} type='button'>
+          Try again!
+        </button>
       </Alert>
     );
-  }
 
+  // console.log(currentUser);
   return (
-    <>
-      {isLoggedIn && (editMode || location.pathname.includes('/createitem')) && (
-        <Button variant='contained' color='primary' onClick={handleOpen}>
-          Add Item
-        </Button>
-      )}
+    <Row>
+      <Col>
+        <br />
+        <br />
+        <form
+          style={{ border: '1px solid black' }}
+          onSubmit={handleSubmit(handleData)}
+        >
+          <label htmlFor='item_name'>Item Name</label>
+          <br />
+          {isLoggedIn && location.pathname.includes('/item') && !editMode && (
+            <span> {item.item_name} </span>
+          )}
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Add Item</DialogTitle>
-        <DialogContent>
-          <form onSubmit={handleSubmit(handleData)}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <Box mb={2}>
-                  <TextField
-                    label='Item Name'
-                    variant='outlined'
-                    id='item_name'
-                    {...register('item_name')}
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={12}>
-                <Box mb={2}>
-                  <TextField
-                    label='Description'
-                    variant='outlined'
-                    id='description'
-                    {...register('description')}
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={12}>
-                <Box mb={2}>
-                  <TextField
-                    label='Quantity'
-                    variant='outlined'
-                    type='number'
-                    id='quantity'
-                    {...register('quantity')}
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={12}>
-                <Button variant='contained' color='primary' type='submit'>
-                  Submit
-                </Button>
-              </Grid>
-            </Grid>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </>
+          {isLoggedIn && location.pathname.includes('/item') && editMode && (
+            <input
+              placeholder={item.item_name ?? ''}
+              type='text'
+              id='item_name'
+              {...register('item_name')}
+            />
+          )}
+          {isLoggedIn && location.pathname.includes('/createitem') && (
+            <input type='text' id='item_name' {...register('item_name')} />
+          )}
+          <br />
+
+          <label htmlFor='description'>Description</label>
+          <br />
+          {isLoggedIn && location.pathname.includes('/item') && !editMode && (
+            <span> {item.description} </span>
+          )}
+          {isLoggedIn && location.pathname.includes('/item') && editMode && (
+            <input
+              placeholder={item.description || 'Description'}
+              type='text'
+              id='description'
+              {...register('description')}
+            />
+          )}
+          {isLoggedIn && location.pathname.includes('/createitem') && (
+            <input type='text' id='description' {...register('description')} />
+          )}
+          <br />
+
+          <label htmlFor='quantity'>Quantity</label>
+          <br />
+          {isLoggedIn && location.pathname.includes('/item') && !editMode && (
+            <span> {item.quantity} </span>
+          )}
+          {isLoggedIn && location.pathname.includes('/item') && editMode && (
+            <input
+              placeholder={item.quantity || null}
+              type='number'
+              id='quantity'
+              {...register('quantity')}
+            />
+          )}
+          {isLoggedIn && location.pathname.includes('/createitem') && (
+            <input type='number' id='quantity' {...register('quantity')} />
+          )}
+          <br />
+
+          {((isLoggedIn && location.pathname.includes('/item') && editMode) ||
+            (isLoggedIn && location.pathname.includes('/createitem'))) && (
+            <button type='submit'>Submit</button>
+          )}
+        </form>
+      </Col>
+    </Row>
   );
 }
